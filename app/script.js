@@ -1,10 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { render } from 'react-dom';
 
 const App = () => {
   const [status, setStatus] = useState('off');
   const [time, setTime] = useState(null);
   const [timer, setTimer] = useState(null);
+
+  const formatTime = () => {
+    let seconds = String(time % 60).padStart(2, '0');
+    let minutes = String(Math.floor(time / 60)).padStart(2, '0');
+
+    return `${minutes}:${seconds}`;
+  };
+
+  const startTimer = () => {
+    setTime(1200);
+    setStatus('work');
+    setTimer(
+      setInterval(() => {
+        setTime((time) => time - 1);
+      }, 1000)
+    );
+  };
+
+  const stopTimer = () => {
+    setTimer(null);
+    setTime(null);
+    setStatus('off');
+    clearInterval(timer);
+  };
+
+  const closeApp = () => {
+    window.close();
+  };
+
+  const playBell = () => {
+    const bellSound = new Audio('./sounds/bell.wav');
+    bellSound.play();
+  };
+
+  useEffect(() => {
+    if (time === 0) {
+      playBell();
+      if (status === 'work') {
+        setStatus('rest');
+        setTime(20);
+      } else {
+        setStatus('work');
+        setTime(1200);
+      }
+    }
+  });
 
   return (
     <div>
@@ -24,10 +70,20 @@ const App = () => {
       )}
       {status === 'work' && <img src='./images/work.png' />}
       {status === 'rest' && <img src='./images/rest.png' />}
-      {status !== 'off' && <div className='timer'>18:23</div>}
-      {status === 'off' && <button className='btn'>Start</button>}
-      {status !== 'off' && <button className='btn'>Stop</button>}
-      <button className='btn btn-close'>X</button>
+      {status !== 'off' && <div className='timer'>{formatTime()}</div>}
+      {status === 'off' && (
+        <button className='btn' onClick={startTimer}>
+          Start
+        </button>
+      )}
+      {status !== 'off' && (
+        <button className='btn' onClick={stopTimer}>
+          Stop
+        </button>
+      )}
+      <button className='btn btn-close' onClick={closeApp}>
+        X
+      </button>
     </div>
   );
 };
